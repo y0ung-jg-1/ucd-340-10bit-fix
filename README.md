@@ -1,4 +1,4 @@
-# 10-bit RGB Color Extractor
+# UCD-340 色彩分析仪 10-bit RGB 导出器
 
 从 UCD 导出的 bin 文件中批量提取出现最多的 RGB 颜色值。
 
