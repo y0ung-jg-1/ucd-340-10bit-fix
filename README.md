@@ -50,9 +50,34 @@ python extract_top_colors.py <bin文件目录> [输出csv路径]
 - Python 3.x
 - numpy
 
-## 打包 exe
+## 打包
+
+### 安装打包工具
 
 ```bash
-pip install pyinstaller
+pip install pyinstaller numpy
+```
+
+### Windows 打包 (.exe)
+
+```bash
 pyinstaller --onefile --noconsole --name "10bit_RGB_Extractor" extract_top_colors_gui.py
 ```
+
+生成文件：`dist/10bit_RGB_Extractor.exe`
+
+### macOS 打包 (.app + .dmg)
+
+```bash
+# 打包 .app
+pyinstaller --onefile --noconsole --name "10bit_RGB_Extractor" extract_top_colors_gui.py
+
+# 创建 DMG 安装包（含 Applications 快捷方式）
+mkdir -p dist/dmg_temp
+cp -r dist/10bit_RGB_Extractor.app dist/dmg_temp/
+ln -s /Applications dist/dmg_temp/Applications
+hdiutil create -volname "10bit_RGB_Extractor" -srcfolder dist/dmg_temp -ov -format UDZO dist/10bit_RGB_Extractor.dmg
+rm -rf dist/dmg_temp
+```
+
+生成文件：`dist/10bit_RGB_Extractor.dmg`
