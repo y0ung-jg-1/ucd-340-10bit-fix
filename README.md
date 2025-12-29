@@ -80,6 +80,8 @@ python -m pip install pyinstaller numpy
 
 # 打包 .app
 pyinstaller 10bit_RGB_Extractor.spec
+或者
+pyinstaller --onefile --noconsole --name "10bit_RGB_Extractor" extract_top_colors_gui.py
 
 # 创建 DMG 安装包（含 Applications 快捷方式）
 mkdir -p dist/dmg_temp
