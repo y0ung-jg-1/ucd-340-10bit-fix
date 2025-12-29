@@ -14,7 +14,7 @@
 
 | 文件 | 说明 |
 |------|------|
-| `10bit_RGB_Extractor.exe` | 打包好的 exe，可直接运行 |
+| `dist/10bit_RGB_Extractor.exe` | （可选）Windows 打包产物，需自行用 PyInstaller 生成 |
 | `extract_top_colors_gui.py` | GUI 主程序源码 |
 | `extract_top_colors.py` | 命令行版本源码 |
 | `10bit_RGB_Extractor.spec` | PyInstaller 打包配置 |
@@ -23,10 +23,11 @@
 
 ### GUI 版本
 
-1. 双击 `10bit_RGB_Extractor.exe` 运行
-2. 选择 BIN 文件夹
-3. 选择位深度（10-bit 或 8-bit）
-4. 点击"开始提取"
+1. 运行源码：`python3 extract_top_colors_gui.py`（推荐开发/调试）
+2. 或运行打包产物：`dist/10bit_RGB_Extractor.app`（macOS）/ `dist/10bit_RGB_Extractor.exe`（Windows，需自行打包）
+3. 选择 BIN 文件夹
+4. 选择位深度（10-bit 或 8-bit）
+5. 点击"开始提取"
 
 ### 命令行版本
 
@@ -68,9 +69,17 @@ pyinstaller --onefile --noconsole --name "10bit_RGB_Extractor" extract_top_color
 
 ### macOS 打包 (.app + .dmg)
 
+> 注意：macOS 26 上系统自带的 Tk 8.5 会在启动时崩溃（`TkpInit` / `Tcl_Panic`）。
+> 建议使用 Homebrew 的 Python（或 python.org 安装包）来打包，确保 Tk 版本为 8.6+/9.0。
+
 ```bash
+# 建议使用 Homebrew Python（示例路径：/opt/homebrew/bin/python3）
+/opt/homebrew/bin/python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install pyinstaller numpy
+
 # 打包 .app
-pyinstaller --onefile --noconsole --name "10bit_RGB_Extractor" extract_top_colors_gui.py
+pyinstaller 10bit_RGB_Extractor.spec
 
 # 创建 DMG 安装包（含 Applications 快捷方式）
 mkdir -p dist/dmg_temp
