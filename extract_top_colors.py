@@ -3,7 +3,7 @@ import os
 import glob
 import re
 import csv
-import numpy as np
+import argparse
 
 
 def extract_top_color(bin_file, width=1280, height=720, bit_depth=10):
@@ -13,6 +13,8 @@ def extract_top_color(bin_file, width=1280, height=720, bit_depth=10):
     bit_depth: 10 或 8
     返回: (R, G, B)
     """
+    import numpy as np
+
     data = np.fromfile(bin_file, dtype=np.uint8)
     data = data.reshape(-1, 4)
 
@@ -52,10 +54,18 @@ def get_file_index(filename):
     return -1
 
 
-def batch_extract(input_dir, output_csv):
+def colors_similar(color, prev_color, tolerance):
+    if prev_color is None:
+        return False
+    if tolerance <= 0:
+        return color == prev_color
+    return all(abs(c - p) <= tolerance for c, p in zip(color, prev_color))
+
+
+def batch_extract(input_dir, output_csv, bit_depth=10, enable_dedup=True, dedup_tolerance=0):
     """
     批量提取bin文件中出现最多的颜色，写入CSV
-    跳过与前一张相同的图片
+    去重：当每通道与上一帧差值均 <= dedup_tolerance 时视为同一帧
     """
     bin_files = glob.glob(os.path.join(input_dir, "*.bin"))
     bin_files = sorted(bin_files, key=lambda f: get_file_index(os.path.basename(f)))
@@ -68,9 +78,9 @@ def batch_extract(input_dir, output_csv):
 
     for i, bin_file in enumerate(bin_files):
         filename = os.path.basename(bin_file)
-        color = extract_top_color(bin_file)
+        color = extract_top_color(bin_file, bit_depth=bit_depth)
 
-        if color == prev_color:
+        if enable_dedup and colors_similar(color, prev_color, dedup_tolerance):
             skipped += 1
             continue
 
@@ -90,10 +100,29 @@ def batch_extract(input_dir, output_csv):
 
 
 if __name__ == "__main__":
-    import sys
-    if len(sys.argv) >= 2:
-        input_dir = sys.argv[1]
-        output_csv = sys.argv[2] if len(sys.argv) >= 3 else os.path.join(input_dir, "output.csv")
-        batch_extract(input_dir, output_csv)
-    else:
-        print("用法: python extract_top_colors.py <bin文件目录> [输出csv路径]")
+    parser = argparse.ArgumentParser(
+        description="从 UCD 导出的 bin 文件中批量提取出现最多的 RGB 颜色值，并输出 CSV。"
+    )
+    parser.add_argument("input_dir", help="bin 文件目录")
+    parser.add_argument("output_csv", nargs="?", help="输出 CSV 路径（默认：<bin目录>/output.csv）")
+    parser.add_argument("--bit-depth", type=int, choices=[8, 10], default=10, help="位深度（默认：10）")
+    parser.add_argument("--no-dedup", action="store_true", help="关闭去重")
+    parser.add_argument(
+        "--dedup-tolerance",
+        type=int,
+        default=0,
+        help="去重阈值：每通道与上一帧差值 <= N 视为同一帧（默认：0，完全相同）",
+    )
+
+    args = parser.parse_args()
+    if args.dedup_tolerance < 0:
+        parser.error("--dedup-tolerance 必须为非负整数")
+
+    output_csv = args.output_csv or os.path.join(args.input_dir, "output.csv")
+    batch_extract(
+        args.input_dir,
+        output_csv,
+        bit_depth=args.bit_depth,
+        enable_dedup=not args.no_dedup,
+        dedup_tolerance=args.dedup_tolerance,
+    )

@@ -6,7 +6,7 @@
 
 - 支持 **10-bit** (0-1023) 和 **8-bit** (0-255) 模式
 - 批量处理 bin 文件，按序号排序
-- 自动去重（跳过与前一帧相同的颜色）
+- 自动去重（可设置阈值，跳过与上一帧相同/相似的颜色）
 - 输出 CSV 格式（R, G, B）
 - GUI 界面，操作简单
 
@@ -31,7 +31,7 @@
 ### 命令行版本
 
 ```bash
-python extract_top_colors.py <bin文件目录> [输出csv路径]
+python3 extract_top_colors.py <bin文件目录> [输出csv路径] [--dedup-tolerance N] [--no-dedup] [--bit-depth 8|10]
 ```
 
 ## bin 文件格式
