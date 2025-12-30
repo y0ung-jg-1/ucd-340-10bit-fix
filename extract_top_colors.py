@@ -101,7 +101,7 @@ def batch_extract(input_dir, output_csv, bit_depth=10, enable_dedup=True, dedup_
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="从 UCD 导出的 bin 文件中批量提取出现最多的 RGB 颜色值，并输出 CSV。"
+        description="从 UCD 导出的 bin 文件中批量提取出现最多的 RGB 颜色值 (v1.2.0)。支持图片一致性检测（去重阈值设置）。"
     )
     parser.add_argument("input_dir", help="bin 文件目录")
     parser.add_argument("output_csv", nargs="?", help="输出 CSV 路径（默认：<bin目录>/output.csv）")

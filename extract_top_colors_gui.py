@@ -120,10 +120,11 @@ class ColorExtractor:
 
 class Application(tk.Tk):
     """主应用程序窗口"""
+    VERSION = "1.2.0"
 
     def __init__(self):
         super().__init__()
-        self.title("10-bit RGB颜色提取工具")
+        self.title(f"10-bit RGB颜色提取工具 v{self.VERSION}")
         self.geometry("800x700")
         self.resizable(True, True)
 
