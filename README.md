@@ -1,6 +1,6 @@
-# UCD-340 色彩分析仪 10-bit RGB 导出器 `v1.2.0`
+# UCD-340 色彩分析仪 10-bit RGB 导出器 `v1.3.0`
 
-从 UCD 导出的 bin 文件中批量提取出现最多的 RGB 颜色值。
+从 UCD 导出的 bin 文件中批量提取出现最多的 RGB 颜色值，支持 TIFF 图像导出和视频合成。
 
 ## 功能特点
 
@@ -8,11 +8,15 @@
 - 批量处理 bin 文件，按序号排序
 - **图片一致性检测 (去重)**：可设置阈值，跳过与上一帧相同或相似的颜色
 - 输出 CSV 格式（R, G, B）
+- **TIFF 图像导出**：将 BIN 数据导出为 TIFF 图像（10-bit → 16-bit TIFF，8-bit → 8-bit TIFF）
+- **视频导出**：合成 H.265/H.264 视频，支持 SDR 和 HDR 色彩空间
 - GUI 界面，操作简单
 
-## 最新更新 (v1.2.0)
+## 最新更新 (v1.3.0)
 
-- **新增图片一致性检测阈值设置**：允许在去重时设置通道差值阈值，提高对略有波动的信号的提取稳定性。
+- **新增视频导出功能**：支持将 BIN 文件合成为视频，10-bit 模式使用 H.265 编码（yuv420p10le），8-bit 模式使用 H.264 编码（yuv420p）
+- **支持 SDR/HDR 色彩空间**：视频导出可选择 SDR 或 HDR 色彩空间
+- GUI 界面新增模式选择器：支持 CSV 提取、TIFF 导出、视频导出三种模式切换
 
 ## 文件说明
 
@@ -29,14 +33,29 @@
 
 1. 运行源码：`python3 extract_top_colors_gui.py`（推荐开发/调试）
 2. 或运行打包产物：`dist/10bit_RGB_Extractor.app`（macOS）/ `dist/10bit_RGB_Extractor.exe`（Windows，需自行打包）
-3. 选择 BIN 文件夹
-4. 选择位深度（10-bit 或 8-bit）
-5. 点击"开始提取"
+3. 选择模式：CSV 提取 / TIFF 导出 / 视频导出
+4. 选择 BIN 文件夹
+5. 选择位深度（10-bit 或 8-bit）
+6. 点击"开始提取"
 
 ### 命令行版本
 
+#### 颜色提取
+
 ```bash
 python3 extract_top_colors.py <bin文件目录> [输出csv路径] [--dedup-tolerance N] [--no-dedup] [--bit-depth 8|10]
+```
+
+#### TIFF 图像导出
+
+```bash
+python3 extract_top_colors.py <bin文件或目录> --export-tiff [--output-dir DIR] [--width W] [--height H] [--bit-depth 8|10]
+```
+
+#### 视频导出
+
+```bash
+python3 extract_top_colors.py <bin文件目录> --export-video [--fps 30] [--color-space sdr|hdr] [--output-dir DIR] [--width W] [--height H] [--bit-depth 8|10]
 ```
 
 ## bin 文件格式
@@ -54,13 +73,17 @@ python3 extract_top_colors.py <bin文件目录> [输出csv路径] [--dedup-toler
 
 - Python 3.x
 - numpy
+- tifffile（10-bit TIFF 导出需要）
+- Pillow（8-bit TIFF 导出需要）
+- tkinter（GUI，Python 自带）
+- FFmpeg（视频导出需要，需在系统 PATH 中）
 
 ## 打包
 
 ### 安装打包工具
 
 ```bash
-pip install pyinstaller numpy
+pip install pyinstaller numpy Pillow tifffile
 ```
 
 ### Windows 打包 (.exe)
@@ -80,7 +103,7 @@ pyinstaller --onefile --noconsole --name "10bit_RGB_Extractor" extract_top_color
 # 建议使用 Homebrew Python（示例路径：/opt/homebrew/bin/python3）
 /opt/homebrew/bin/python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install pyinstaller numpy
+python -m pip install pyinstaller numpy Pillow tifffile
 
 # 打包 .app
 pyinstaller 10bit_RGB_Extractor.spec
